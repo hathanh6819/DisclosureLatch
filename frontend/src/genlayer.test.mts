@@ -1,0 +1,5 @@
+import test from'node:test';import assert from'node:assert/strict';import{connectedWallet,genToWei}from'./genlayer.ts';
+const ADDRESS='0x1111111111111111111111111111111111111111';const provider=(account=ADDRESS,chainId='0xf22d')=>({request:async({method}:{method:string})=>method==='eth_requestAccounts'?[account]:method==='eth_chainId'?chainId:Promise.reject(Error(method))});
+test('configures provider and verified account separately',async()=>{let cfg:any;const injected=provider();const result=await connectedWallet(injected,ADDRESS,((x:any)=>{cfg=x;return{}})as any);assert.equal(result.account,ADDRESS);assert.equal(cfg.provider,injected);assert.equal(cfg.account,ADDRESS);assert.equal(cfg.chain.id,61997)});
+test('rejects changed account and wrong chain before client construction',async()=>{await assert.rejects(connectedWallet(provider(),'0x2222222222222222222222222222222222222222',(()=>({}))as any),/changed/);await assert.rejects(connectedWallet(provider(ADDRESS,'0x1'),ADDRESS,(()=>({}))as any),/61997/)});
+test('parses GEN without floating overprecision',()=>{assert.equal(genToWei('0.02'),20000000000000000n);assert.throws(()=>genToWei('0.0000001'),/valid GEN/)})

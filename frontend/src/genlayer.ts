@@ -1,12 +1,15 @@
 import {createClient} from 'genlayer-js';
 import {studioDevnet} from 'genlayer-js/chains';
-
-export const CONTRACT=(import.meta.env.VITE_CONTRACT_ADDRESS||'0x752eA1c5B3b7b192019781a6392f278a959077C9').trim();
-export const configured=/^0x[a-fA-F0-9]{40}$/.test(CONTRACT);
-export const explorer=configured?`https://explorer-studio-dev.genlayer.com/address/${CONTRACT}`:'';
-export const reader=createClient({chain:studioDevnet});
-export const writer=()=>{if(!window.ethereum)throw Error('Install and connect an injected wallet on GenLayer Studio Next.');return createClient({chain:studioDevnet,provider:window.ethereum})};
-export const short=(v:string)=>v?`${v.slice(0,6)}...${v.slice(-4)}`:'Not deployed';
-export const genToWei=(v:string)=>BigInt(Math.round(Number(v)*1e6))*10n**12n;
+import type {CalldataEncodable,TransactionHash} from 'genlayer-js/types';
+export const studioNext={...studioDevnet,id:61997,name:'GenLayer Studio Next',rpcUrls:{default:{http:['https://studio-next.genlayer.com/api']}}};
+const env=(import.meta as ImportMeta&{env?:Record<string,string>}).env;
+export const CONTRACT=(env?.VITE_CONTRACT_ADDRESS||'0x752eA1c5B3b7b192019781a6392f278a959077C9').trim();
+export const configured=/^0x[a-fA-F0-9]{40}$/.test(CONTRACT);export const explorer=configured?`https://explorer-studio-dev.genlayer.com/address/${CONTRACT}`:'';export const reader=createClient({chain:studioNext});
+export type InjectedProvider={request:(request:{method:string;params?:unknown[]})=>Promise<unknown>};type ClientFactory=typeof createClient;
+export async function connectedWallet(provider:InjectedProvider|undefined,expected='',factory:ClientFactory=createClient){if(!provider?.request)throw Error('Install a compatible injected wallet.');const accounts=await provider.request({method:'eth_requestAccounts'}) as string[],account=accounts?.[0]||'';if(!/^0x[a-fA-F0-9]{40}$/.test(account))throw Error('Wallet returned no valid account.');const chainId=BigInt(String(await provider.request({method:'eth_chainId'})));if(chainId!==61997n)throw Error('Switch the wallet to GenLayer Studio Next (chain ID 61997).');if(expected&&account.toLowerCase()!==expected.toLowerCase())throw Error('Wallet account changed. Reconnect before signing.');return{account,client:factory({chain:studioNext,provider:provider as never,account:account as `0x${string}`})}}
+export async function connectWallet(){return(await connectedWallet(window.ethereum as InjectedProvider|undefined)).account}
+export const readFinalized=<T=unknown>(functionName:string,args:CalldataEncodable[]=[])=>reader.readContract({address:CONTRACT,functionName,args,jsonSafeReturn:true,stateStatus:'finalized'} as any) as Promise<T>;
+export async function writeFinalized(expected:string,functionName:string,args:CalldataEncodable[],value=0n){if(!configured)throw Error('Contract address is not configured.');const{client}=await connectedWallet(window.ethereum as InjectedProvider|undefined,expected);const fees=await client.estimateTransactionFees({leaderTimeunitsAllocation:260n,validatorTimeunitsAllocation:600n});const raw=await client.writeContract({address:CONTRACT,functionName,args,value,fees:{distribution:fees.distribution,feeValue:fees.feeValue}});const hash=(typeof raw==='string'?raw:(raw as{hash?:string;txId?:string}).hash||(raw as{txId?:string}).txId||'') as TransactionHash;if(!/^0x[a-fA-F0-9]{64}$/.test(hash))throw Error('Wallet returned an invalid transaction hash.');const receipt=await reader.waitForTransactionReceipt({hash,waitUntil:'finalized',interval:4000,retries:300}) as any;if(receipt?.txExecutionResultName&&receipt.txExecutionResultName!=='FINISHED_WITH_RETURN')throw Error(`${functionName} finalized with ${receipt.txExecutionResultName}.`);return hash}
+export const short=(v:string)=>v?`${v.slice(0,6)}...${v.slice(-4)}`:'Not available';
+export const genToWei=(v:string)=>{if(!/^\d+(\.\d{1,6})?$/.test(v))throw Error('Enter a valid GEN amount with at most 6 decimals.');return BigInt(Math.round(Number(v)*1e6))*10n**12n};
 export const txUrl=(hash:string)=>`https://explorer-studio-dev.genlayer.com/tx/${hash}`;
-export const normalizeTx=(v:unknown)=>typeof v==='string'?v:String((v as {txId?:string})?.txId||'');

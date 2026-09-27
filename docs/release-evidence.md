@@ -7,7 +7,12 @@ This file separates completed verification from work that requires a deployed St
 | Production contract syntax and GenVM validation | PASS | `genvm_linter check contracts/disclosure_latch.py` and contract validator |
 | Source-probe syntax and GenVM validation | PASS | `genvm_linter check contracts/sec_source_probe.py` and contract validator |
 | Direct production-contract unit/adversarial suite | PASS | Exact version 3 source: 12 passed, including model contradiction, malformed/conflicting consensus output, retry-budget griefing, self-claim, outsider recovery, conservation, and replay |
+| Frontend wallet regression tests | PASS | `npm test`; provider/account separation, account/chain rejection and exact GEN parsing |
 | Frontend typecheck and production build | PASS | `npm run build`; Vite 8 production bundle completed |
+| Multi-page client routing | PASS | `/`, `/console`, `/search`, and `/reviews`, with Cloudflare deep-link fallback |
+| Global ID search and review explorer | PASS | Finalized bounty/submission lookup plus canonical SEC, contract, verdict and evidence audit links |
+| Remediation Cloudflare deployment | PASS | [`https://disclosure-latch.pages.dev`](https://disclosure-latch.pages.dev), deployment `2aeda4c6-bb37-4fae-8d22-a494f24bcb3f`; all four direct routes return HTTP 200 |
+| Production finalized search readback | PASS | Contract totals: 3 bounties / 3 submissions; ID 1 resolves to `PAID / REQUIREMENT_SATISFIED` |
 | Frontend visual smoke test | PASS | Production deployment at [`disclosure-latch.pages.dev`](https://disclosure-latch.pages.dev): logo, responsive hero, contract v3 link, live totals and lifecycle state verified |
 | Source probe deployment | PASS | Contract [`0xd172...7bBa`](https://explorer-studio.genlayer.com/address/0xd172557c6Cfc249E2A9fBA5611112C21D9d67bBa), [deployment tx](https://explorer-studio.genlayer.com/tx/0x1050acd8861e83602292731e492a4d655b3190361f95387c0bb0dd700b9a63f3), `FINALIZED / MAJORITY_AGREE` |
 | Validator-side SEC source probe | BLOCKED | [Attempt 1](https://explorer-studio.genlayer.com/tx/0x9756ae806f3199c70a95cfc1beee261705c43f735321715efbc7797233cabf2f), [attempt 2](https://explorer-studio.genlayer.com/tx/0x1ed2f68b10eb33558fd43f5c2c999356b0429f575032a4d11ea1d69f215a4f44), and [attempt 3](https://explorer-studio.genlayer.com/tx/0xfb6adbd8b67efb81625449a5b9a4881a3e66dbb5a0a6fd527ce3a2bdd2d635a1) finalized as `NO_MAJORITY` with no round validators; no SEC fetch result exists |

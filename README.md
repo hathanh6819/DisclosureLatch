@@ -32,6 +32,8 @@ Only a consistent `MATCH` can progress to payout. A valid non-match reopens the 
 
 The two project test wallets are documented in [`docs/release-evidence.md`](docs/release-evidence.md), but they are not privileged or hard-coded. Reviewers can run an independent lifecycle with their own two wallets.
 
+The client is split into four deep-linkable routes: the overview (`/`), transaction console (`/console`), global finalized-state ID search (`/search`), and a dedicated evidence review explorer (`/reviews`). Before every write, the frontend verifies the injected account and Studio Next chain ID, then passes `provider` and `account` separately to `genlayer-js`.
+
 ## Source and fixture
 
 The authoritative source is SEC EDGAR. See [`docs/test-resources.md`](docs/test-resources.md) and the pinned [`samples/sec-fixture-manifest.json`](samples/sec-fixture-manifest.json).
