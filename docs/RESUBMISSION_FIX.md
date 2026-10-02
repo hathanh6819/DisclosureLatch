@@ -23,3 +23,12 @@ The previous resubmission still required reviewers to know and type numeric boun
 4. Open `/console` and confirm the target controls are descriptive dropdowns rather than ID text fields.
 
 Automated regression coverage fails if `Search every record by ID`, `Numeric ID`, `Bounty ID`, or `Submission ID` input markup returns.
+
+## Production verification — 2026-10-02
+
+- Production: https://disclosure-latch.pages.dev
+- Fixed commit: `e2b9d6f`
+- `/search`, `/reviews`, and `/console` each returned HTTP 200 after deployment.
+- The served production bundle contains `Browse finalized records`, `Choose a decision to audit`, `Select an open bounty`, and `Select a filing submission`.
+- The served production bundle does not contain `Search every record by ID`, `Numeric ID`, `Bounty ID`, or `Submission ID`.
+- Contract tests: 12 passed. Frontend tests: 4 passed. Production build: passed.
